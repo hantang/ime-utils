@@ -21,3 +21,7 @@ ime-utils = "ime_utils.cli:main"
 dev = [
     "ruff>=0.12.11",
 ]
+
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"
