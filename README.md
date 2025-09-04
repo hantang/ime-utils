@@ -1,6 +1,8 @@
 # IME-Utils
 
-Chinese IME ciku (aka cell wordlist file) parsing tool.
+中文输入法词库文件（细胞词库）解析工具。
+
+> Chinese IME ciku (aka cell wordlist file) parsing tool.
 
 支持：
 
@@ -12,7 +14,10 @@ Chinese IME ciku (aka cell wordlist file) parsing tool.
 调用
 
 ```python
-# 安装：uv pip install .
+# 安装
+# pip install ime-utils
+# uv pip install . # 本地
+
 # 用例：
 from ime_utils.parser import SogouParser, BaiduParser
 
