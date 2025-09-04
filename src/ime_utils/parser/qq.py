@@ -48,8 +48,6 @@ class QQParser(SogouParser):
 class QQV1DictStruct(DictStruct):
     def __init__(self):
         super().__init__(
-            suffix="qpyd",
-            encoding="utf-16le",
             count=DictField(start=0x44, end=0x48),
             description=DictField(start=0x60),  # 词库名、分类等都合并在一起编码
             extra=DictField(start=0x38, end=0x3C),  # 词语列表开始位置
@@ -57,9 +55,9 @@ class QQV1DictStruct(DictStruct):
 
 
 class QQV1Parser(BaseParser):
+    suffix = "qpyd"
+    encoding = "utf-16le"
     struct = QQV1DictStruct()
-    encoding = struct.encoding
-    suffix = struct.suffix
     offset_word: int = 0
     count: int = 0
 

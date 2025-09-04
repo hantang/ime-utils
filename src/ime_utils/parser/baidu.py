@@ -40,8 +40,6 @@ from ime_utils.pinyin.baidu import BAIDU_PINYIN_INITIALS as PINYIN_INITIALS
 class BaiduDictStruct(DictStruct):
     def __init__(self):
         super().__init__(
-            suffix="bdict",
-            encoding="utf-16le",
             count=DictField(start=0x70, end=0x74),
             name=DictField(start=0x90),
             author=DictField(start=0xD0),
@@ -60,9 +58,10 @@ class BaiduDictStruct(DictStruct):
 
 
 class BaiduParser(BaseParser):
+    suffix = "bdict"
+    encoding = "utf-16le"
     struct = BaiduDictStruct()
-    encoding = struct.encoding
-    suffix = struct.suffix
+
     initial_count = len(PINYIN_INITIALS)
     final_count = len(PINYIN_FINALS)
     code_map: dict[int, str] = {i: v for i, v in enumerate(PINYIN_INITIALS + PINYIN_FINALS)}
@@ -127,7 +126,9 @@ class BaiduParser(BaseParser):
 
             if word_len == 0:
                 word, pinyin_list, pos = self._parse_special(word_data, pos)
-                is_error = not word or (self._check_pinyin(pinyin_list) and len(word) == pinyin_list)
+                is_error = not word or (
+                    self._check_pinyin(pinyin_list) and len(word) == pinyin_list
+                )
                 entry = WordEntry(word, pinyin_list, weight, is_error=is_error)
                 word_list.append(entry)  # 备注
                 continue
@@ -166,8 +167,12 @@ class BaiduParser(BaseParser):
                 pos += word_len * 2
                 pinyin_list = self._parse_pinyin(data_pinyin)
                 word = self._decode_data(data_word)
-                if len(word) > 100 or len(word) * 5 <= len(pinyin_list) or len(word) > len(pinyin_list):
-                    is_error = True 
+                if (
+                    len(word) > 100
+                    or len(word) * 5 <= len(pinyin_list)
+                    or len(word) > len(pinyin_list)
+                ):
+                    is_error = True
 
             is_error = is_error or (not word) or self._check_pinyin(pinyin_list)
             entry = WordEntry(word, pinyin_list, weight, is_error=is_error)  # TODO is_error
@@ -238,6 +243,5 @@ class BaiduMobileDictStruct(BaiduDictStruct):
 
 
 class BaiduMobileParser(BaiduParser):
+    suffix = "bcd"
     struct = BaiduMobileDictStruct()
-    encoding = struct.encoding
-    suffix = struct.suffix

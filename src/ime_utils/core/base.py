@@ -2,9 +2,9 @@ import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+from ..pinyin.syllable import PINYIN_SYLLABLES
 from .models import DictCell, DictField, DictMeta, WordEntry
 from .utils import byte2str, create_dir
-from ime_utils.pinyin.syllable import PINYIN_SYLLABLES
 
 
 class BaseParser(ABC):
@@ -17,8 +17,9 @@ class BaseParser(ABC):
     4. 解析词库元信息并补充额外信息
     """
 
-    encoding: str = "utf-16le"
-    suffix: str = ""
+    suffix: str  # 文件后缀（小写，不带点号）
+    encoding: str = "utf-16le"  # 编码类型"utf-16le"最常见
+
     step: int = 2
     code_map: dict[int, str] = None
     dict_cell: DictCell = None
@@ -26,7 +27,7 @@ class BaseParser(ABC):
     letters: set[str] = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
     @abstractmethod
-    def parse(self, file_path) -> bool:
+    def parse(self, file_path: Path | str) -> bool:
         """解析词库文件"""
 
     @abstractmethod
@@ -51,13 +52,13 @@ class BaseParser(ABC):
         with open(file, "rb") as f:
             return f.read()
 
-    def save_data(self, save_file: Path | str, keep_error: bool = False) -> None:
+    def save_data(self, save_file: Path | str, keep_error: bool = False) -> bool:
         if self.dict_cell is None:
             logging.warning("Dict cell data is None")
-            return
+            return False
 
         save_file = Path(save_file)
-        logging.info(f"Save to file {save_file}")
+        logging.debug(f"Save to file {save_file}")
         create_dir(save_file)
 
         with open(save_file, "w", encoding="utf-8") as f:
@@ -70,7 +71,8 @@ class BaseParser(ABC):
                     continue
                 f.write(word.to_str() + "\n")
 
-        logging.info("Save done.")
+        logging.debug("Save done.")
+        return True
 
     def _decode_text(
         self, data: bytes, offset: DictField, encoding: str | None = None, is_strip: bool = True

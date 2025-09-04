@@ -89,9 +89,6 @@ class DictField:
 class DictStruct:
     """词库文件结构分段"""
 
-    suffix: str  # 文件后缀
-    encoding: str = "utf-16le"  # 编码类型"utf-16le"最常见
-
     name: DictField = None  # 词库名位置
     category: DictField = None  # 词库分类
     version: DictField = None  # 版本

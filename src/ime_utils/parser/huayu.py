@@ -84,8 +84,6 @@ def read_zipfile(zip_file: Path | str, suffix: str, encoding="gbk") -> bytes:
 class HuayuDictStruct(DictStruct):
     def __init__(self):
         super().__init__(
-            suffix="uwl",
-            encoding="utf-16le",
             name=DictField(start=0x04),
             author=DictField(start=0x24),
             count=DictField(start=0x44),
@@ -107,9 +105,10 @@ class HuayuDictStruct(DictStruct):
 
 
 class HuayuParser(BaseParser):
+    suffix = "uwl"
+    encoding = "utf-16le"
     struct = HuayuDictStruct()
-    encoding = struct.encoding
-    suffix = struct.suffix
+
     initial_count = len(PINYIN_INITIALS)
     final_count = len(PINYIN_FINALS)
     code_map: dict[int, str] = {i: v for i, v in enumerate(PINYIN_INITIALS + PINYIN_FINALS)}

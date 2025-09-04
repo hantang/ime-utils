@@ -51,8 +51,6 @@ def _check_extra_word(data: bytes, pos: int, step: int, encoding: str) -> int:
 class SogouDictStruct(DictStruct):
     def __init__(self):
         super().__init__(
-            suffix="scel",
-            encoding="utf-16le",
             name=DictField(start=0x130),
             category=DictField(start=0x338),
             description=DictField(start=0x540),
@@ -73,9 +71,9 @@ class SogouDictStruct(DictStruct):
 
 
 class SogouParser(BaseParser):
+    suffix = "scel"
+    encoding = "utf-16le"
     struct = SogouDictStruct()
-    suffix = struct.suffix
-    encoding = struct.encoding
 
     def parse(self, file_path: Path | str) -> bool:
         file_path = Path(file_path)
