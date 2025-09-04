@@ -1,0 +1,12 @@
+[project]
+name = "ime-utils"
+version = "0.1.0"
+description = "Chinese IME ciku(aka cell wordlist file) parsing tool"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.11",
+]
