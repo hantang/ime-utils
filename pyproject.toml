@@ -6,6 +6,13 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/hantang/ime-utils"
+Documentation = "https://github.com/hantang/ime-utils"
+Repository = "https://github.com/hantang/ime-utils.git"
+Issues = "https://github.com/hantang/ime-utils/issues"
+Changelog = "https://github.com/hantang/ime-utils/blob/mai/CHANGELOG.md"
+
 [dependency-groups]
 dev = [
     "ruff>=0.12.11",
