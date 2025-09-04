@@ -1,5 +1,4 @@
 import argparse
-import logging
 import sys
 import time
 from pathlib import Path
@@ -87,10 +86,10 @@ class ParserToolkit:
         for parser in parsers:
             self.factory.register_parser(parser)
 
-    def process(self, file_path: Path, save_file: Path) -> bool:
+    def process(self, file_path: Path, save_file: Path, keep_error: bool) -> bool:
         parser = self.get_parser(file_path)
         if parser.parse(file_path):
-            return parser.save_data(save_file)
+            return parser.save_data(save_file, keep_error)
         return False
 
     def get_parser(self, file_path: Path) -> BaseParser:
@@ -101,7 +100,7 @@ class ParserToolkit:
         return self.factory.get_suffixes()
 
 
-def process(file_names: str, input_dir: str, output_dir: str):
+def process(file_names: str, input_dir: str, output_dir: str, keep_error: bool) -> None:
     toolkit = ParserToolkit()
     files: list[Path] = []
     if file_names:
@@ -138,7 +137,7 @@ def process(file_names: str, input_dir: str, output_dir: str):
                 # print(f"忽略文件：{file}, 输出文件已存在")
                 ignores[suffix] += 1
                 continue
-            if toolkit.process(file_names, save_file):
+            if toolkit.process(file_names, save_file, keep_error):
                 stats[suffix] += 1
     print(stats, ignores)
     result = "\n".join(
@@ -158,20 +157,21 @@ def process(file_names: str, input_dir: str, output_dir: str):
     print(f"处理完成：\n\n{result}\n")
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="输入法词库解析工具")
     parser.add_argument("-f", "--file", type=str, default=None, help="词库文件（逗号分隔多个文件）")
     parser.add_argument("-d", "--dir", type=str, default=None, help="词库目录")
     parser.add_argument("-o", "--out", type=str, default=".", help="保存目录")
+    parser.add_argument("-e", "--keep-error", action="store_true", help="保留解析异常词语")
 
     args = parser.parse_args()
-    logging.debug(f"args = {args}")
+    print(f"args = {args}")
     if not args.file and not args.dir:
         parser.print_help()
-        logging.error("请配置 -f 指定词库文件，或 -d 指定词库目录")
+        print("\n 请配置 -f 指定词库文件，或 -d 指定词库目录")
         return 1
 
-    process(args.file, args.dir, args.out)
+    process(args.file, args.dir, args.out, args.keep_error)
 
     return 0
 
