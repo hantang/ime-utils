@@ -11,7 +11,9 @@
 - [x] QQ 拼音（`.qcel`）、QQ 拼音旧版（6.0 以下词库，`.qpyd`）
 - [x] 华宇拼音（紫光输入法）（`.uwl`）
 
-调用
+## 使用
+
+- 程序调用：
 
 ```python
 # 安装
@@ -29,6 +31,18 @@ files = [
 ]
 
 for file in files[:]:
+    save_file = f"out-{file}.txt"
     if parser.parse(file):
-        parser.save_data(f"out-{file}.txt", keep_error=False)
+        parser.save_data(save_file, keep_error=False)
+```
+
+- 命令行调用
+
+```shell
+# 或者 python -m ime_utils -f file-names -o output
+
+# 指定多个文件
+ime-utils -f file-name1,file-name2 -o output
+# 指定目录，保留解析异常词语
+ime-utils -d file-dir -o text --keep-error
 ```
