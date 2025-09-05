@@ -52,8 +52,8 @@ for file in files[:]:
 
 # 指定多个文件
 ime-utils -f file-name1,file-name2 -o output
-# 指定目录，保留解析异常词语
-ime-utils -d file-dir -o text --keep-error
+# 指定目录，-e保留解析异常词语, -r 目录递归检索文件
+ime-utils -d file-dir -o text -e -r
 ```
 
 ## 相关

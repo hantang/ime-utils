@@ -13,13 +13,6 @@ permissions:
 jobs:
   release-build:
     runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     python-version:
-    #       - "3.10"
-    #       - "3.11"
-    #       - "3.12"
-    #       - "3.13"
 
     steps:
       - uses: actions/checkout@v4
@@ -65,8 +58,6 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v2
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ACTION }}
         with:
           tag_name: ${{ github.ref_name }}
           files: dist/*
@@ -80,7 +71,7 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/p/YOURPROJECT
+      url: https://pypi.org/project/ime-utils
 
     steps:
       - name: Retrieve release distributions
