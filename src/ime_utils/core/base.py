@@ -21,9 +21,9 @@ class BaseParser(ABC):
     encoding: str = "utf-16le"  # 编码类型"utf-16le"最常见
 
     step: int = 2
-    code_map: dict[int, str] = None
-    dict_cell: DictCell = None
-    current_file: str = None
+    code_map: dict[int, str] = dict()
+    dict_cell: DictCell | None = None
+    current_file: str = ""
     pinyin_syllables: set[str] = set(PINYIN_SYLLABLES)
     letters: set[str] = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -31,7 +31,7 @@ class BaseParser(ABC):
     def parse(self, file_path: Path | str) -> bool:
         """解析词库文件"""
 
-    def check(self, data: bytes) -> bool:
+    def check(self, data: bytes | None) -> bool:
         if not data:
             logging.error("文件无数据")
             return False
@@ -78,14 +78,18 @@ class BaseParser(ABC):
         return True
 
     def _decode_text(
-        self, data: bytes, offset: DictField, encoding: str | None = None, is_strip: bool = True
+        self,
+        data: bytes,
+        offset: DictField | None,
+        encoding: str | None = None,
+        is_strip: bool = True,
     ) -> str:
         if not encoding:
             encoding = self.encoding
         encode_data = data[offset.start : offset.end] if offset else data
         return byte2str(encode_data, encoding, is_strip)
 
-    def _check_pinyin(self, pinyin_list: str, allow_en: bool = True) -> bool:
+    def _check_pinyin(self, pinyin_list: list[str], allow_en: bool = True) -> bool:
         """
         判断拼音需要是否有效
         allow_en允许单个英文字母

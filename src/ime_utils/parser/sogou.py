@@ -95,7 +95,7 @@ class SogouParser(BaseParser):
         self.dict_cell = DictCell(metadata, words)
         return True
 
-    def check(self, data: bytes) -> bool:
+    def check(self, data: bytes | None) -> bool:
         if data and data[:1] != b"@":
             logging.error(f"文件前缀格式不符合: {self.current_file}")
             return False
@@ -161,7 +161,7 @@ class SogouParser(BaseParser):
             # 词语
             for _ in range(homonym_count):
                 char_len = byte2uint(word_data[pos : pos + step])
-                word = self._decode_text(word_data[pos + step : pos + step + char_len], None, False)
+                word = self._decode_text(word_data[pos + step : pos + step + char_len], None, None, False)
                 pos += step + char_len
 
                 if char_len != pinyin_index_len and word:
@@ -201,7 +201,7 @@ class SogouParser(BaseParser):
         for _ in range(block_len):
             char_count = byte2uint(word_data[pos : pos + step])  # 词语对应字数
             pos += step
-            word = self._decode_text(word_data[pos + step : pos + step * char_count], None, False)
+            word = self._decode_text(word_data[pos + step : pos + step * char_count], None, None, False)
             pos += step * char_count
 
             entry = WordEntry(word, [], 0, is_error=True)

@@ -28,18 +28,18 @@ class WordEntry:
 class DictMeta:
     """词库文件元信息：词库名等配置内容"""
 
-    file: str = None  # 词库文件名
-    name: str = None  # 词库名
-    category: str = None  # 词库分类
-    version: str = None  # 版本
-    description: str = None  # 描述信息
-    author: str = None  # 作者
-    examples: list[str] = None  # 词库示例
+    file: str = ""  # 词库文件名
+    name: str = ""  # 词库名
+    category: str = ""  # 词库分类
+    version: str = ""  # 版本
+    description: str = ""  # 描述信息
+    author: str = ""  # 作者
+    examples: list[str] = list()  # 词库示例
     count: int | str = ""  # 词条数量（可能来自词库文件内置数据）
     count_actual: int = 0  # 实际解析统计词条数据
     count_error: int = 0  # 实际解析统计词条数据
 
-    def to_str(self, extra: str | None = None, keep_all: bool = False) -> True:
+    def to_str(self, extra: str = "", keep_all: bool = False) -> str:
         """
         keep_all: 保留空白字段
         """
@@ -48,7 +48,7 @@ class DictMeta:
         words = ""
         if self.examples:
             words = " ".join([re.sub(r"\s+", "", v) for v in self.examples])
-        info_list = [
+        info_list: list[list[str]] = [
             ["文件名称", self.file],
             ["词库名称", self.name],
             ["词库分类", self.category],
@@ -56,12 +56,12 @@ class DictMeta:
             ["词库作者", self.author],
             ["词库描述", self.description],
             ["词条样例", words],
-            ["词条数量", self.count],
-            ["解析词数", self.count_actual],
-            ["解析异常", self.count_error],
+            ["词条数量", str(self.count)],
+            ["解析词数", str(self.count_actual)],
+            ["解析异常", str(self.count_error)],
         ]
-        info_list2 = [
-            [key, re.sub(r"[\r\n\s，]+", " ", str(value)).strip()]
+        info_list2: list[list[str]] = [
+            [key, re.sub(r"[\r\n\s，]+", " ", value).strip()]
             for key, value in info_list
             if keep_all or value or key in ["词条数量", "解析词数"]
         ]
@@ -76,34 +76,30 @@ class DictCell:
     """词库文件"""
 
     metadata: DictMeta
-    words: list[WordEntry] = None
-
-    def __post_init__(self):
-        if self.words is None:
-            self.words = []
+    words: list[WordEntry] = []
 
 
 @dataclass
 class DictField:
     start: int
-    end: int = None
+    end: int | None = None
 
 
 @dataclass
 class DictStruct:
     """词库文件结构分段"""
 
-    name: DictField = None  # 词库名位置
-    category: DictField = None  # 词库分类
-    version: DictField = None  # 版本
-    description: DictField = None  # 描述信息
-    author: DictField = None  # 作者
-    examples: DictField = None  # 词库示例
-    count: DictField = None  # 词条数量
-    code_len: DictField = None  # 编码映射表长度
-    code_map: DictField = None  # 编码映射表（一般为拼音）
-    words: DictField = None  # 词语列表
-    extra: DictField = None  # 额外字段
+    name: DictField = DictField(0)  # 词库名位置
+    category: DictField = DictField(0)  # 词库分类
+    version: DictField = DictField(0)  # 版本
+    description: DictField = DictField(0)  # 描述信息
+    author: DictField = DictField(0)  # 作者
+    examples: DictField = DictField(0)  # 词库示例
+    count: DictField = DictField(0)  # 词条数量
+    code_len: DictField = DictField(0)  # 编码映射表长度
+    code_map: DictField = DictField(0)  # 编码映射表（一般为拼音）
+    words: DictField = DictField(0)  # 词语列表
+    extra: DictField = DictField(0)  # 额外字段
 
     def init_end(self, var_list: list[DictField]):
         # 根据后一字段补全end

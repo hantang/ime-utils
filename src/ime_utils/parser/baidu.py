@@ -81,12 +81,12 @@ class BaiduParser(BaseParser):
         metadata = self.extract_meta(data)
         metadata.file = file_path.name
         metadata.count_actual = len(words)
-        metadata.count_error = sum(1 for w in words if w.is_error)
+        metadata.count_error = sum([1 for w in words if w.is_error])
 
         self.dict_cell = DictCell(metadata, words)
         return True
 
-    def check(self, data: bytes) -> bool:
+    def check(self, data: bytes | None) -> bool:
         if data and data[:8] != b"biptbdsw":
             logging.error(f"文件前缀格式不符合: {self.current_file}")
             return False
@@ -110,7 +110,7 @@ class BaiduParser(BaseParser):
         logging.debug(f"词库 = {name} / 分类 = {category}")
         return metadata
 
-    def extract_words(self, data: bytes) -> tuple[list[list], list[str]]:
+    def extract_words(self, data: bytes, allow_error: bool = False) -> list[WordEntry]:
         step = self.step
         half = step // 2
         word_data = data
@@ -211,7 +211,7 @@ class BaiduParser(BaseParser):
         out = re.sub(r"\s*[\r\n]+\s*", " ", out)
         return out
 
-    def _parse_special(self, word_data: bytes, pos_raw: int) -> tuple[str, str, int]:
+    def _parse_special(self, word_data: bytes, pos_raw: int) -> tuple[str, list[str], int]:
         """
         TODO 词长、拼音长度为0的
         # zhe'yang'zi'piao'liang'mazheyangzihaonankanye这样子漂亮吗

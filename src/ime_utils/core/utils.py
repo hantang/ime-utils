@@ -19,10 +19,10 @@ def byte2uint(
     return int.from_bytes(byte_data[:max_len], byteorder=byteorder)
 
 
-def byte2str(byte_data: bytes, encoding: str, is_strip: bool = True) -> str | None:
+def byte2str(byte_data: bytes, encoding: str, is_strip: bool = True) -> str:
     try:
         out = byte_data.decode(encoding)
         return out.strip("\x00") if is_strip else out
     except UnicodeDecodeError:
         pass
-    return None
+    return ""

@@ -40,8 +40,14 @@ from .sogou import SogouParser
 class QQParser(SogouParser):
     suffix: str = "qcel"
 
-    def _decode_text(self, data: bytes, offset: DictField, is_strip: bool = True) -> str:
-        out = super()._decode_text(data, offset, self.encoding, is_strip)
+    def _decode_text(
+        self,
+        data: bytes,
+        offset: DictField | None,
+        encoding: str | None = None,
+        is_strip: bool = True,
+    ) -> str:
+        out = super()._decode_text(data, offset, encoding, is_strip)
         return out.split("\x00")[0]
 
 
@@ -61,7 +67,7 @@ class QQV1Parser(BaseParser):
     offset_word: int = 0
     count: int = 0
 
-    def check(self, data: bytes) -> bool:
+    def check(self, data: bytes | None) -> bool:
         if data and data[:4] != b"\x09\xa6\x1e\x7d":
             logging.error(f"文件前缀格式不符合: {self.current_file}")
             return False
@@ -97,10 +103,10 @@ class QQV1Parser(BaseParser):
             [v.strip().split(": ", 1) for v in data_info.split("\r\n") if v.strip()]
         )
 
-        name = data_info_dict.get("Name")
-        category = " ".join([data_info_dict.get("Type"), data_info_dict.get("FirstType")])
-        description = data_info_dict.get("Intro")
-        examples = data_info_dict.get("Example").split()
+        name = data_info_dict.get("Name", "")
+        category = " ".join([data_info_dict.get("Type", ""), data_info_dict.get("FirstType", "")])
+        description = data_info_dict.get("Intro", "")
+        examples = data_info_dict.get("Example", "").split()
         metadata = DictMeta(
             name=name,
             category=category,
@@ -133,7 +139,9 @@ class QQV1Parser(BaseParser):
 
             pinyin_data = word_data[word_index:word_index2]
             pinyin_list = pinyin_data.decode("utf-8").split("'")  # 自带'进行分割
-            word = self._decode_text(word_data[word_index2 : word_index2 + word_len], None, False)
+            word = self._decode_text(
+                word_data[word_index2 : word_index2 + word_len], None, None, False
+            )
             is_error = len(pinyin_data) == len(pinyin_list) or self._check_pinyin(pinyin_list)
             entry = WordEntry(word, pinyin_list, weight, is_error=is_error)
             word_list.append(entry)

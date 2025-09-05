@@ -33,6 +33,7 @@ zip文件（内部是txt, gbk编码）：地名/上海地名.uwl
 """
 
 import logging
+from os import PathLike
 from pathlib import Path
 
 from ime_utils.core.base import BaseParser
@@ -40,7 +41,6 @@ from ime_utils.core.models import DictCell, DictField, DictMeta, DictStruct, Wor
 from ime_utils.core.utils import byte2uint
 from ime_utils.pinyin.huayu import HUAYU_PINYIN_FINALS as PINYIN_FINALS
 from ime_utils.pinyin.huayu import HUAYU_PINYIN_INITIALS as PINYIN_INITIALS
-
 
 # def read_rarfile(rar_file, suffix) -> bytes:
 #     """
@@ -64,11 +64,14 @@ from ime_utils.pinyin.huayu import HUAYU_PINYIN_INITIALS as PINYIN_INITIALS
 #     return data
 
 
-def read_zipfile(zip_file: Path | str, suffix: str, encoding="gbk") -> bytes:
+def read_zipfile(
+    file: str | PathLike[str], suffix: str, encoding: str | None = "gbk"
+) -> bytes | None:
     import zipfile
 
-    with zipfile.ZipFile(zip_file, metadata_encoding=encoding) as zf:
+    with zipfile.ZipFile(file, mode="r", metadata_encoding=encoding) as zf:  # type: ignore
         names = zf.namelist()
+        # name.encode("cp437").decode("gbk")
         names_valid = [name for name in names if name.endswith(suffix)]
         if not names_valid:
             logging.warning(f"suffix={suffix} name file is None: {names}")
@@ -117,11 +120,12 @@ class HuayuParser(BaseParser):
         self.dict_cell = None
         file_path = Path(file_path)
         self.current_file = file_path.as_posix()
+        struct = self.struct
         data = self._preprocess(file_path)
         if not self.check(data):
             return False
 
-        struct = self.struct
+        assert data is not None
         self.encoding = self._init_encoding(data)
         logging.debug(f"encoding = {self.encoding}")
 
@@ -139,18 +143,21 @@ class HuayuParser(BaseParser):
         self.dict_cell = DictCell(metadata, words)
         return True
 
-    def check(self, data: bytes) -> bool:
+    def check(self, data: bytes | None) -> bool:
         if data and data[:4] not in [b"\x94\x19\x08\x14", b"\x94\x19\x09\x14"]:
             logging.error(f"文件前缀格式不符合: {self.current_file}")
             return False
         return super().check(data)
 
-    def _preprocess(self, file_path: Path) -> None:
+    def _preprocess(self, file_path: Path) -> bytes | None:
         data = self.read_data(file_path)
         if data:
             if data[:2] == b"PK":
                 logging.warning(f"文件格式为ZIP，解压处理中：{file_path}")
-                data = read_zipfile(file_path, self.suffix)
+                zip_data = read_zipfile(file_path, self.suffix)
+                if not zip_data:
+                    return None
+                data = zip_data
             elif data[:4] == b"Rar!":
                 logging.error(f"文件格式为RAR，请先解压：{file_path}")
                 # data = read_rarfile(file_path, self.suffix)
@@ -182,7 +189,7 @@ class HuayuParser(BaseParser):
             word_list.extend(out)
         return word_list
 
-    def parse_segment(self, data: bytes, index: int) -> list[list]:
+    def parse_segment(self, data: bytes, index: int) -> list[WordEntry]:
         header_len = self.struct.seg_header
         step = self.step
         block_len = step * 2  # 4字节
@@ -235,7 +242,7 @@ class HuayuParser(BaseParser):
             word_list.append(entry)
         return word_list
 
-    def _decode_word(self, word_data: bytes) -> bytes:
+    def _decode_word(self, word_data: bytes) -> str | None:
         codes = [self.encoding] + [v for v in ["gbk", "utf-16le", "utf-8"] if v != self.encoding]
         word = None
         try:
@@ -251,7 +258,7 @@ class HuayuParser(BaseParser):
                     break
         return word
 
-    def _parse_pinyin(self, data_pinyin: bytes) -> list[str]:
+    def _parse_pinyin(self, data_pinyin: bytes) -> tuple[list[str], bool]:
         step = self.step  # 2字节
         n1 = self.initial_count
         n2 = self.final_count
