@@ -80,8 +80,8 @@ class BaiduParser(BaseParser):
 
         metadata = self.extract_meta(data)
         metadata.file = file_path.name
-        if not metadata.count:
-            metadata.count = len(words)
+        metadata.count_actual = len(words)
+        metadata.count_error = sum(1 for w in words if w.is_error)
 
         self.dict_cell = DictCell(metadata, words)
         return True
@@ -99,7 +99,6 @@ class BaiduParser(BaseParser):
         category = self._decode_text(data, struct.category)
         description = self._decode_text(data, struct.description)
         data_count = byte2uint(data[struct.count.start : struct.count.end])
-        category = re.sub(r"[\r\n\s，]+", " ", category)
         metadata = DictMeta(
             name=name,
             author=author,

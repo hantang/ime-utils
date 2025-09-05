@@ -82,8 +82,9 @@ class QQV1Parser(BaseParser):
 
         metadata = self.extract_meta(data)
         metadata.file = file_path.name
-        if not metadata.count:
-            metadata.count = len(words)
+        metadata.count_actual = len(words)
+        metadata.count_error = sum(1 for w in words if w.is_error)
+
         self.dict_cell = DictCell(metadata, words)
         return True
 

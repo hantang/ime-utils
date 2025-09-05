@@ -35,7 +35,9 @@ class DictMeta:
     description: str = None  # 描述信息
     author: str = None  # 作者
     examples: list[str] = None  # 词库示例
-    count: int = 0  # 词条数量（可能来自文件内数据，可能是实际解析统计）
+    count: int | str = ""  # 词条数量（可能来自词库文件内置数据）
+    count_actual: int = 0  # 实际解析统计词条数据
+    count_error: int = 0  # 实际解析统计词条数据
 
     def to_str(self, extra: str | None = None, keep_all: bool = False) -> True:
         """
@@ -55,13 +57,15 @@ class DictMeta:
             ["词库描述", self.description],
             ["词条样例", words],
             ["词条数量", self.count],
+            ["解析词数", self.count_actual],
+            ["解析异常", self.count_error],
         ]
-
-        info_text = [
-            "".join(map(str, [prefix, key, separator, value]))
+        info_list2 = [
+            [key, re.sub(r"[\r\n\s，]+", " ", str(value)).strip()]
             for key, value in info_list
-            if keep_all or value
+            if keep_all or value or key in ["词条数量", "解析词数"]
         ]
+        info_text = ["".join([prefix, key, separator, value]) for key, value in info_list2]
         if extra:
             info_text.append(extra)
         return "\n".join(info_text)
