@@ -1,6 +1,6 @@
 [project]
 name = "ime-utils"
-version = "0.2.2"
+version = "0.2.3"
 description = "Chinese IME ciku (aka cell wordlist file) parsing tool"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -19,6 +19,7 @@ ime-utils = "ime_utils.cli:main"
 
 [dependency-groups]
 dev = [
+    "mypy>=1.17.1",
     "ruff>=0.12.11",
 ]
 

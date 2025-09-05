@@ -33,7 +33,8 @@ jobs:
 
       - name: Build release distributions
         run: |
-          uv run ruff check .
+          uvx ruff check .
+          uvx mypy .
           uv build
 
       - name: Upload distributions
