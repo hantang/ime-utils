@@ -76,7 +76,9 @@ class SogouParser(BaseParser):
     struct = SogouDictStruct()
 
     def parse(self, file_path: Path | str) -> bool:
+        self.dict_cell = None
         file_path = Path(file_path)
+        self.current_file = file_path.as_posix()
         data = self.read_data(file_path)
         if not self.check(data):
             return False
@@ -95,9 +97,9 @@ class SogouParser(BaseParser):
 
     def check(self, data: bytes) -> bool:
         if data and data[:1] != b"@":
-            logging.error("文件前缀格式不符合")
+            logging.error(f"文件前缀格式不符合: {self.current_file}")
             return False
-        return True
+        return super().check(data)
 
     def extract_meta(self, data: bytes) -> DictMeta:
         struct = self.struct
@@ -143,7 +145,7 @@ class SogouParser(BaseParser):
             pinyin_index_len = byte2uint(word_data[pos + step : pos + step * 2])
             pos += step * 2
             if pinyin_index_len > 100:
-                logging.warning(f"Bad pinyin {pinyin_index_len}")
+                logging.debug(f"拼音长度异常 {pinyin_index_len}")
                 # group = word_data[pos:].find(b"\x00" * 8) # 尝试寻找新开始点
 
             # 拼音
@@ -152,7 +154,7 @@ class SogouParser(BaseParser):
                 index = byte2uint(word_data[pos + i : pos + i + step])
                 if index >= len(pinyin_dict):
                     # 拼音越界出错: 提前终止？
-                    logging.warning(f"Out of bound = {index}/{len(pinyin_dict)}")
+                    logging.debug(f"Out of bound = {index}/{len(pinyin_dict)}")
                 pinyin_list.append(pinyin_dict.get(index, "*"))
             pos += pinyin_index_len
 

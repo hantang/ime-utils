@@ -23,6 +23,7 @@ class BaseParser(ABC):
     step: int = 2
     code_map: dict[int, str] = None
     dict_cell: DictCell = None
+    current_file: str = None
     pinyin_syllables: set[str] = set(PINYIN_SYLLABLES)
     letters: set[str] = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -30,9 +31,11 @@ class BaseParser(ABC):
     def parse(self, file_path: Path | str) -> bool:
         """解析词库文件"""
 
-    @abstractmethod
     def check(self, data: bytes) -> bool:
-        pass
+        if not data:
+            logging.error("文件无数据")
+            return False
+        return True
 
     @abstractmethod
     def extract_meta(self, data: bytes) -> DictMeta:

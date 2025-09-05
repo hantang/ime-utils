@@ -41,7 +41,7 @@ class QQParser(SogouParser):
     suffix: str = "qcel"
 
     def _decode_text(self, data: bytes, offset: DictField, is_strip: bool = True) -> str:
-        out = super()._decode_text(data, offset, is_strip)
+        out = super()._decode_text(data, offset, self.encoding, is_strip)
         return out.split("\x00")[0]
 
 
@@ -62,12 +62,13 @@ class QQV1Parser(BaseParser):
     count: int = 0
 
     def check(self, data: bytes) -> bool:
-        if data[:4] != b"\x09\xa6\x1e\x7d":
-            logging.error("文件前缀格式不符合")
+        if data and data[:4] != b"\x09\xa6\x1e\x7d":
+            logging.error(f"文件前缀格式不符合: {self.current_file}")
             return False
-        return True
+        return super().check(data)
 
     def parse(self, file_path: Path | str) -> bool:
+        self.dict_cell = None
         file_path = Path(file_path)
         data = self.read_data(file_path)
         if not self.check(data):
@@ -132,10 +133,7 @@ class QQV1Parser(BaseParser):
             pinyin_data = word_data[word_index:word_index2]
             pinyin_list = pinyin_data.decode("utf-8").split("'")  # 自带'进行分割
             word = self._decode_text(word_data[word_index2 : word_index2 + word_len], None, False)
-            is_error = len(pinyin_data) == len(pinyin_list)
-            if is_error:
-                print(word, pinyin_list)
-            is_error = is_error or self._check_pinyin(pinyin_list)
+            is_error = len(pinyin_data) == len(pinyin_list) or self._check_pinyin(pinyin_list)
             entry = WordEntry(word, pinyin_list, weight, is_error=is_error)
             word_list.append(entry)
 

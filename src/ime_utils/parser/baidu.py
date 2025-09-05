@@ -67,8 +67,9 @@ class BaiduParser(BaseParser):
     code_map: dict[int, str] = {i: v for i, v in enumerate(PINYIN_INITIALS + PINYIN_FINALS)}
 
     def parse(self, file_path: Path | str) -> bool:
+        self.dict_cell = None
         file_path = Path(file_path)
-        self.file = file_path
+        self.current_file = file_path.as_posix()
         data = self.read_data(file_path)
         if not self.check(data):
             return False
@@ -87,9 +88,9 @@ class BaiduParser(BaseParser):
 
     def check(self, data: bytes) -> bool:
         if data and data[:8] != b"biptbdsw":
-            logging.error("文件前缀格式不符合")
+            logging.error(f"文件前缀格式不符合: {self.current_file}")
             return False
-        return True
+        return super().check(data)
 
     def extract_meta(self, data: bytes) -> DictMeta:
         struct = self.struct
@@ -126,9 +127,7 @@ class BaiduParser(BaseParser):
 
             if word_len == 0:
                 word, pinyin_list, pos = self._parse_special(word_data, pos)
-                is_error = not word or (
-                    self._check_pinyin(pinyin_list) and len(word) == pinyin_list
-                )
+                is_error = not word or self._check_pinyin(pinyin_list) or len(word) != pinyin_list
                 entry = WordEntry(word, pinyin_list, weight, is_error=is_error)
                 word_list.append(entry)  # 备注
                 continue

@@ -116,10 +116,9 @@ class HuayuParser(BaseParser):
     def parse(self, file_path: Path | str) -> bool:
         self.dict_cell = None
         file_path = Path(file_path)
-        self.file = file_path
+        self.current_file = file_path.as_posix()
         data = self._preprocess(file_path)
         if not self.check(data):
-            logging.error(f"Bad file = {file_path}")
             return False
 
         struct = self.struct
@@ -141,13 +140,10 @@ class HuayuParser(BaseParser):
         return True
 
     def check(self, data: bytes) -> bool:
-        if not data:
-            logging.error("文件无数据")
+        if data and data[:4] not in [b"\x94\x19\x08\x14", b"\x94\x19\x09\x14"]:
+            logging.error(f"文件前缀格式不符合: {self.current_file}")
             return False
-        if data[:4] not in [b"\x94\x19\x08\x14", b"\x94\x19\x09\x14"]:
-            logging.error("文件前缀格式不符合")
-            return False
-        return data
+        return super().check(data)
 
     def _preprocess(self, file_path: Path) -> None:
         data = self.read_data(file_path)
