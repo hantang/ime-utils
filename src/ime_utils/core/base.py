@@ -64,11 +64,12 @@ class BaseParser(ABC):
         logging.debug(f"Save to file {save_file}")
         create_dir(save_file)
 
-        with open(save_file, "w", encoding="utf-8") as f:
-            meta = self.dict_cell.metadata.to_str()
-            f.write(meta.strip() + "\n\n")
+        meta = self.dict_cell.metadata.to_str()
+        words = self.dict_cell.words
 
-            words = self.dict_cell.words
+        with open(save_file, "w", encoding="utf-8") as f:
+            f.write(meta + "\n\n")
+
             for word in words:
                 if not keep_error and word.is_error:
                     continue
@@ -76,6 +77,16 @@ class BaseParser(ABC):
 
         logging.debug("Save done.")
         return True
+
+    def export_data(self, keep_error: bool = False) -> dict[str, list[str]]:
+        if self.dict_cell is None:
+            logging.warning("Dict cell data is None")
+            return {"meta": [], "words": []}
+
+        meta_list = self.dict_cell.metadata.to_list()
+        word_list = [w.to_str() for w in self.dict_cell.words if keep_error or not w.is_error]
+        result = {"meta": meta_list, "words": word_list}
+        return result
 
     def _decode_text(
         self,
