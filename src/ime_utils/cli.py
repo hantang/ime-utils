@@ -66,7 +66,7 @@ class ParserToolkit:
 
     def _register_parsers(self):
         # 动态导入并注册所有解析器
-        from ime_utils.parser import (
+        from ime_utils import (
             BaiduMobileParser,
             BaiduParser,
             HuayuParser,
