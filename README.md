@@ -39,10 +39,11 @@ files = [
     "体操基本术语.bdict",
 ]
 
-for file in files[:]:
+for file in files:
     save_file = f"out-{file}.txt"
     if parser.parse(file):
         parser.save_data(save_file, keep_error=False)
+        result = parser.export_data()
 ```
 
 - 命令行调用
@@ -56,14 +57,28 @@ ime-utils -f file-name1,file-name2 -o output
 ime-utils -d file-dir -o text -e -r
 ```
 
+## 开发
+
+```shell
+# 开发环境
+uv sync --dev --all-extras # --locked
+
+# 提交前检查
+uvx ruff check .
+uvx mypy .
+
+# 构建
+uv build
+```
+
 ## 相关
 
 - [:link: 蔷薇词库转换 nopdan/rose](https://github.com/nopdan/rose)
-    ![](https://img.shields.io/github/v/release/nopdan/rose)
-    ![](https://img.shields.io/github/license/nopdan/rose)
-    ![](https://img.shields.io/github/last-commit/nopdan/rose)
+  ![](https://img.shields.io/github/v/release/nopdan/rose)
+  ![](https://img.shields.io/github/license/nopdan/rose)
+  ![](https://img.shields.io/github/last-commit/nopdan/rose)
 
 - [:link: 深蓝词库转换 studyzy/imewlconverter](https://github.com/studyzy/imewlconverter)
-    ![](https://img.shields.io/github/v/release/studyzy/imewlconverter)
-    ![](https://img.shields.io/github/license/studyzy/imewlconverter)
-    ![](https://img.shields.io/github/last-commit/studyzy/imewlconverter)
+  ![](https://img.shields.io/github/v/release/studyzy/imewlconverter)
+  ![](https://img.shields.io/github/license/studyzy/imewlconverter)
+  ![](https://img.shields.io/github/last-commit/studyzy/imewlconverter)
